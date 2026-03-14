@@ -22,10 +22,18 @@ export interface Conversacion {
   id: string;
   nombre: string;
   telefono: string;
+  company?: string;
+  role?: string;
+  lead_status?: 'new' | 'active' | 'closed';
+  lead_tag?: string;
+  notes?: string;
+  avatar?: string;
   created_at: string;
   ultimoMensaje: string;
   ultimoMensajeTime: string;
   remitente: string;
+  pedidos?: any[];
+  tareas?: any[];
 }
 
 // Para compatibilidad con los componentes existentes
@@ -101,20 +109,37 @@ function getAvatarUrl(nombre: string): string {
  * Convertir Conversacion (Supabase) a Conversation (componentes)
  */
 export function mapConversacion(conv: Conversacion): Conversation {
+  const mappedDeals = (conv.pedidos || []).map((p: any) => ({
+    id: p.id || '',
+    title: p.title || p.producto || 'Deal',
+    value: p.value || 0,
+    stage: p.stage || p.estado || 'New',
+    closingDate: p.closing_date || '',
+    progress: p.progress || 0
+  }));
+
+  const mappedTasks = (conv.tareas || []).map((t: any) => ({
+    id: t.id || '',
+    title: t.title || 'Task',
+    dueInfo: t.due_info || '',
+    completed: t.completed || false,
+    overdue: t.overdue || false
+  }));
+
   return {
-    id: conv.telefono, // Usamos el teléfono como ID
+    id: conv.telefono, // Usamos el teléfono como ID principal en UI
     contact: {
       id: conv.id,
       name: conv.nombre || conv.telefono,
-      avatar: getAvatarUrl(conv.nombre || conv.telefono),
-      role: '',
-      company: '',
-      leadStatus: 'new',
-      leadTag: 'Cliente',
-      deals: [],
-      tasks: [],
-      notes: '',
-      online: false,
+      avatar: conv.avatar && conv.avatar.startsWith('http') ? conv.avatar : getAvatarUrl(conv.nombre || conv.telefono),
+      role: conv.role || '',
+      company: conv.company || '',
+      leadStatus: conv.lead_status || 'new',
+      leadTag: conv.lead_tag || 'Lead',
+      deals: mappedDeals,
+      tasks: mappedTasks,
+      notes: conv.notes || '',
+      online: false, // Simulado visualmente
       telefono: conv.telefono,
     },
     lastMessage: conv.ultimoMensaje,

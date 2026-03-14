@@ -16,37 +16,71 @@ function App() {
   const [activeNav, setActiveNav] = useState('chats');
   const [loading, setLoading] = useState(true);
 
-  // Cargar conversaciones al montar
+  // Cargar conversaciones al montar y hacer polling cada 5 segundos
   useEffect(() => {
-    fetchConversations()
-      .then((data) => {
-        const mapped = data.map(mapConversacion);
-        setConversations(mapped);
-        if (mapped.length > 0) {
-          setSelectedConvId(mapped[0].id);
-        }
-      })
-      .catch((err) => {
-        console.error('Error al cargar conversaciones:', err);
-        // Si no hay conexión, mostrar el dashboard vacío
-        setConversations([]);
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
-  // Cargar mensajes cuando cambia la conversación
-  useEffect(() => {
-    if (selectedConvId) {
-      fetchMessages(selectedConvId)
+    let isMounted = true;
+    
+    const loadConversations = () => {
+      fetchConversations()
         .then((data) => {
-          const mapped = data.map(mapMensaje);
-          setMessages(mapped);
+          if (!isMounted) return;
+          const mapped = data.map(mapConversacion);
+          // Solo actualizar si hay cambios (en un escenario real usaríamos comparaciones más precisas, 
+          // pero para React básico esto funciona para refrescar datos)
+          setConversations(mapped);
+          
+          if (mapped.length > 0 && !selectedConvId) {
+            setSelectedConvId(mapped[0].id);
+          }
         })
         .catch((err) => {
-          console.error('Error al cargar mensajes:', err);
-          setMessages([]);
+          console.error('Error al cargar conversaciones:', err);
+        })
+        .finally(() => {
+          if (isMounted) setLoading(false);
         });
+    };
+
+    // Carga inicial
+    loadConversations();
+
+    // Polling cada 5 segundos
+    const intervalId = setInterval(loadConversations, 5000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
+  }, [selectedConvId]);
+
+  // Cargar mensajes cuando cambia la conversación y hacer polling
+  useEffect(() => {
+    let isMounted = true;
+    let intervalId: number;
+
+    const loadMessages = () => {
+       if (selectedConvId) {
+          fetchMessages(selectedConvId)
+            .then((data) => {
+              if (!isMounted) return;
+              const mapped = data.map(mapMensaje);
+              setMessages(mapped);
+            })
+            .catch((err) => {
+              console.error('Error al cargar mensajes:', err);
+            });
+        }
+    };
+
+    if (selectedConvId) {
+       loadMessages(); // Carga inicial
+       intervalId = setInterval(loadMessages, 3000); // Polling cada 3 segundos para el chat activo
     }
+
+    return () => {
+      isMounted = false;
+      if (intervalId) clearInterval(intervalId);
+    };
   }, [selectedConvId]);
 
   const handleSendMessage = useCallback(

@@ -31,3 +31,36 @@ export async function sendMessage(telefono: string, mensaje: string): Promise<Me
   const data = await res.json();
   return data.mensaje;
 }
+
+/** CRM: Actualizar perfil del cliente (notas, lead status, etc) */
+export async function updateClient(telefono: string, updates: any) {
+  const res = await fetch('/api/crm/update-client', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ telefono, updates }),
+  });
+  if (!res.ok) throw new Error('Error al actualizar cliente');
+  return res.json();
+}
+
+/** CRM: Crear o actualizar una tarea */
+export async function saveTask(tarea: any) {
+  const res = await fetch('/api/crm/update-task', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tarea }),
+  });
+  if (!res.ok) throw new Error('Error al guardar tarea');
+  return res.json();
+}
+
+/** CRM: Crear o actualizar un pedido/trato */
+export async function saveDeal(trato: any) {
+  const res = await fetch('/api/crm/update-deal', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ trato }),
+  });
+  if (!res.ok) throw new Error('Error al guardar trato');
+  return res.json();
+}
