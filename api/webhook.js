@@ -23,15 +23,16 @@ export default async function handler(req, res) {
 
   // --- POST: Recibir mensaje de WhatsApp ---
   if (req.method === "POST") {
-    // Responder inmediatamente a Meta
-    res.status(200).json({ status: "received" });
-
     try {
       const datos = extraerMensajeEntrante(req.body);
-      if (!datos) return;
+      
+      if (!datos) {
+        // Si no es un mensaje válido de usuario (ej. mensaje de estado), igual responder 200 a Meta
+        return res.status(200).send("EVENT_RECEIVED");
+      }
 
       const { telefono, texto, nombre } = datos;
-      console.log(`📩 Mensaje de ${telefono}: "${texto}"`);
+      console.log(`📩 Recibiendo mensaje de ${telefono}: "${texto}"`);
 
       // 1. Guardar cliente
       await guardarCliente(telefono, nombre);
@@ -51,11 +52,15 @@ export default async function handler(req, res) {
       // 6. Guardar respuesta
       await guardarMensaje(telefono, respuesta, "negocio");
 
-      console.log(`✅ Flujo completo para ${telefono}`);
+      console.log(`✅ Flujo completo procesado para ${telefono}`);
+      
+      // Responder a Meta SÓLO deespués de que se resolvió todo (o usar waitUntil si Vercel lo soporta, pero await es más seguro aquí)
+      return res.status(200).send("EVENT_RECEIVED");
     } catch (error) {
       console.error("❌ Error webhook:", error.message);
+      // Meta requiere un 200 o seguirá reintentando infinitamente, enviamos 200 aunque falle internamente
+      return res.status(200).send("EVENT_RECEIVED_WITH_ERROR");
     }
-    return;
   }
 
   res.status(405).json({ error: "Método no permitido" });
