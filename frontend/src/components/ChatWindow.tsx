@@ -8,9 +8,14 @@ interface ChatWindowProps {
 
 export default function ChatWindow({ messages, contact }: ChatWindowProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const prevMessagesLength = useRef<number>(0);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Solo auto-scrollear si hay mensajes nuevos, no cada vez que el polling actualiza la referencia del array
+    if (messages.length > prevMessagesLength.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+    }
+    prevMessagesLength.current = messages.length;
   }, [messages]);
 
   if (!contact) {
