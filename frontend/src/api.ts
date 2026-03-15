@@ -15,7 +15,7 @@ export async function fetchConversations(): Promise<Conversacion[]> {
 
 /** Obtener historial de mensajes de un teléfono */
 export async function fetchMessages(telefono: string): Promise<Mensaje[]> {
-  const res = await fetch(`/api/messages/${encodeURIComponent(telefono)}`);
+  const res = await fetch(`/api/messages?telefono=${encodeURIComponent(telefono)}`);
   if (!res.ok) throw new Error('Error al obtener mensajes');
   return res.json();
 }

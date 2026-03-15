@@ -87,6 +87,7 @@ export default function ContactPanel({ contact }: ContactPanelProps) {
               if (!title) return;
               const value = prompt('Deal Value ($):', '0');
               const newDeal = {
+                cliente_id: localContact.id,
                 telefono: localContact.telefono || localContact.id,
                 title,
                 value: parseFloat(value || '0'),
@@ -147,7 +148,7 @@ export default function ContactPanel({ contact }: ContactPanelProps) {
                       const newTasks = prev.tasks.map(t => t.id === task.id ? { ...t, completed: isChecked } : t);
                       return { ...prev, tasks: newTasks };
                     });
-                    saveTask({ id: task.id, telefono: localContact.telefono || localContact.id, title: task.title, completed: isChecked }).catch(console.error);
+                    saveTask({ id: task.id, cliente_id: localContact.id, telefono: localContact.telefono || localContact.id, title: task.title, completed: isChecked }).catch(console.error);
                   }}
                 />
                 <div className="ml-3">

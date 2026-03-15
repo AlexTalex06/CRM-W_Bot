@@ -1,9 +1,9 @@
 // ============================================================
-// api/messages/[telefono].js — Historial de mensajes (Vercel)
-// Ruta dinámica: /api/messages/5215512345678
+// api/messages.js — Historial de mensajes (Vercel)
+// Ruta: /api/messages?telefono=5215512345678
 // ============================================================
 
-import { obtenerHistorial } from "../../lib/supabase.js";
+import { obtenerHistorial } from "../lib/supabase.js";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -12,6 +12,11 @@ export default async function handler(req, res) {
 
   try {
     const { telefono } = req.query;
+
+    if (!telefono) {
+      return res.status(400).json({ error: "Falta el parámetro 'telefono'" });
+    }
+
     const mensajes = await obtenerHistorial(telefono);
     res.status(200).json(mensajes);
   } catch (error) {
