@@ -4,7 +4,7 @@
 // ============================================================
 
 import { extraerMensajeEntrante, enviarMensajeWhatsApp } from "../lib/whatsapp.js";
-import { guardarMensaje, guardarCliente, obtenerHistorial } from "../lib/supabase.js";
+import { guardarMensaje, guardarCliente, obtenerHistorial, guardarPedido } from "../lib/supabase.js";
 import { generarRespuesta } from "../lib/ai.js";
 
 export default async function handler(req, res) {
@@ -34,8 +34,8 @@ export default async function handler(req, res) {
       const { telefono, texto, nombre } = datos;
       console.log(`📩 Recibiendo mensaje de ${telefono}: "${texto}"`);
 
-      // 1. Guardar cliente
-      await guardarCliente(telefono, nombre);
+      // 1. Guardar cliente y obtener su ID de base de datos
+      const cliente = await guardarCliente(telefono, nombre);
 
       // 2. Guardar mensaje del cliente
       await guardarMensaje(telefono, texto, "cliente");
@@ -43,14 +43,28 @@ export default async function handler(req, res) {
       // 3. Obtener historial para contexto
       const historial = await obtenerHistorial(telefono, 10);
 
-      // 4. Generar respuesta con IA
-      const respuesta = await generarRespuesta(texto, historial);
+      // 4. Generar respuesta con IA e identificar si hay un nuevo pedido
+      const aiResponse = await generarRespuesta(texto, historial);
+      const respuesta = aiResponse.respuesta;
+      const pedidoNuevo = aiResponse.pedido;
 
       // 5. Enviar respuesta por WhatsApp
       await enviarMensajeWhatsApp(telefono, respuesta);
 
-      // 6. Guardar respuesta
+      // 6. Guardar respuesta en la BD
       await guardarMensaje(telefono, respuesta, "negocio");
+
+      // 7. Si la IA detectó un pedido confirmado, guardarlo en la tabla de Deals/Pedidos
+      if (pedidoNuevo && pedidoNuevo.descripcion && cliente) {
+        await guardarPedido({
+          cliente_id: cliente.id,
+          telefono: telefono,
+          title: pedidoNuevo.descripcion.substring(0, 100),
+          value: parseFloat(pedidoNuevo.total) || 0,
+          stage: "Proposal" // Se guarda como propuesta inicial
+        });
+        console.log(`✅ ¡Nuevo pedido detectado y guardado para ${telefono}! Detalles:`, pedidoNuevo.descripcion);
+      }
 
       console.log(`✅ Flujo completo procesado para ${telefono}`);
       
