@@ -104,20 +104,7 @@ function App() {
         }
       } catch (err) {
         console.error('Error al enviar mensaje:', err);
-        // Agregar mensaje localmente aunque falle el envío por WhatsApp
-        const localMsg: Message = {
-          id: `local-${Date.now()}`,
-          conversationId: selectedConvId,
-          text,
-          timestamp: new Date().toLocaleTimeString('es-MX', {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true,
-          }),
-          sent: true,
-          read: false,
-        };
-        setMessages((prev) => [...prev, localMsg]);
+        alert("❌ Error: No se pudo enviar tu mensaje por WhatsApp.\n\nPosibles causas:\n1. El Token de Meta guardado en Vercel está mal o ya expiró.\n2. Vercel todavía no termina de cargar la última versión de la app.\n\nPor favor, revisa tus variables de entorno en Vercel.");
       }
     },
     [selectedConvId]
@@ -145,7 +132,7 @@ function App() {
       {activeNav === 'chats' ? (
         <>
           {/* Columna central - Chat */}
-          <main className="flex-1 flex flex-row min-w-0 border-r border-gray-200">
+          <main className="flex-1 flex flex-row min-w-0 border-r border-gray-200 overflow-hidden">
             {/* Lista de conversaciones */}
             <ChatList
               conversations={conversations}
@@ -156,7 +143,7 @@ function App() {
             />
 
             {/* Ventana de chat + Input */}
-            <div className="flex-1 flex flex-col min-w-0">
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
               <ChatWindow messages={messages} contact={selectedContact} />
               <MessageInput onSend={handleSendMessage} disabled={!selectedConvId} />
             </div>
