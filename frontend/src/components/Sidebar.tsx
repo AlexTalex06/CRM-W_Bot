@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 interface SidebarProps {
   activeItem: string;
   onItemClick: (item: string) => void;
@@ -63,8 +65,10 @@ export default function Sidebar({ activeItem, onItemClick }: SidebarProps) {
     },
   ];
 
+  const [showSettings, setShowSettings] = useState(false);
+
   return (
-    <aside className="w-20 lg:w-24 bg-slate-900 flex flex-col items-center py-8 space-y-8 shrink-0">
+    <aside className="w-20 lg:w-24 bg-slate-900 flex flex-col items-center py-8 space-y-8 shrink-0 relative">
       {/* Logo */}
       <div className="mb-4">
         <div className="w-12 h-12 bg-brand-whatsapp rounded-xl flex items-center justify-center text-white shadow-lg">
@@ -85,10 +89,10 @@ export default function Sidebar({ activeItem, onItemClick }: SidebarProps) {
           <button
             key={item.id}
             onClick={() => onItemClick(item.id)}
-            className={`flex flex-col items-center p-3 transition-colors cursor-pointer ${
+            className={`flex flex-col items-center p-3 transition-colors cursor-pointer rounded-xl ${
               activeItem === item.id
-                ? 'text-white border-l-4 border-brand-whatsapp bg-white/5'
-                : 'text-slate-400 hover:text-white'
+                ? 'text-white bg-white/10'
+                : 'text-slate-400 hover:text-white hover:bg-white/5'
             }`}
           >
             {item.icon}
@@ -97,9 +101,36 @@ export default function Sidebar({ activeItem, onItemClick }: SidebarProps) {
         ))}
       </nav>
 
-      {/* Settings */}
-      <div className="pb-8">
-        <button className="text-slate-400 hover:text-white transition-colors cursor-pointer">
+      {/* Settings Dropdown */}
+      <div className="pb-8 relative">
+        {showSettings && (
+          <div className="absolute bottom-16 left-12 w-48 bg-slate-800 rounded-xl shadow-2xl overflow-hidden border border-slate-700 z-50">
+            <ul className="text-sm text-slate-300">
+              <li 
+                onClick={() => { setShowSettings(false); alert("Abrir Perfil de la Empresa (Próximamente)"); }}
+                 className="px-4 py-3 hover:bg-brand-whatsapp hover:text-white cursor-pointer transition-colors border-b border-slate-700"
+              >
+                Perfil del Negocio
+              </li>
+              <li 
+                onClick={() => { setShowSettings(false); alert("Gestión de Usuarios CRM (Próximamente)"); }}
+                className="px-4 py-3 hover:bg-brand-whatsapp hover:text-white cursor-pointer transition-colors border-b border-slate-700"
+              >
+                Usuarios y Permisos
+              </li>
+              <li 
+                onClick={() => { setShowSettings(false); alert("Automatizaciones e IA (Próximamente)"); }}
+                className="px-4 py-3 hover:bg-brand-whatsapp hover:text-white cursor-pointer transition-colors"
+               >
+                Reglas de IA
+              </li>
+            </ul>
+          </div>
+        )}
+        <button 
+          onClick={() => setShowSettings(!showSettings)}
+          className={`transition-colors cursor-pointer p-3 rounded-xl ${showSettings ? 'text-white bg-white/10' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+        >
           <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"

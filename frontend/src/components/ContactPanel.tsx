@@ -31,10 +31,15 @@ export default function ContactPanel({ contact }: ContactPanelProps) {
         <div className="relative inline-block mb-4">
           <img
             alt={localContact.name}
-            className="w-24 h-24 rounded-2xl mx-auto shadow-md object-cover border-4 border-white"
+            className="w-24 h-24 rounded-2xl mx-auto shadow-md object-cover border-4 border-white cursor-pointer hover:opacity-80 transition-opacity"
             src={localContact.avatar}
+            onClick={() => alert("Cambiar Foto de Perfil (Próximamente). Por ahora, el Avatar se genera automáticamente a partir del nombre del cliente.")}
+            title="Cambiar Foto"
           />
-          <span className="absolute bottom-0 right-0 w-6 h-6 bg-brand-crm text-white rounded-full border-2 border-white flex items-center justify-center">
+          <span 
+            className="absolute bottom-0 right-0 w-6 h-6 bg-brand-crm text-white rounded-full border-2 border-white flex items-center justify-center cursor-pointer hover:bg-slate-700 transition-colors"
+            onClick={() => alert("Cambiar Foto de Perfil (Próximamente)")}
+          >
             <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"

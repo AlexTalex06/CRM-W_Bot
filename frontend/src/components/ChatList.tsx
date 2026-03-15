@@ -6,6 +6,7 @@ interface ChatListProps {
   onSelect: (id: string) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  onNewChat?: () => void;
 }
 
 export default function ChatList({
@@ -14,17 +15,28 @@ export default function ChatList({
   onSelect,
   searchQuery,
   onSearchChange,
+  onNewChat,
 }: ChatListProps) {
   const filtered = conversations.filter((conv) =>
     conv.contact.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <section className="w-80 border-r border-gray-100 flex flex-col bg-gray-50/30">
+    <section className="w-80 border-r border-gray-100 flex flex-col bg-gray-50/30 overflow-hidden">
       {/* Header */}
-      <header className="p-4 bg-white border-b border-gray-200 flex justify-between items-center h-16">
+      <header className="p-4 bg-white border-b border-gray-200 flex justify-between items-center h-16 shrink-0">
         <h2 className="font-bold text-xl text-slate-800">Messages</h2>
-        <button className="p-2 text-slate-500 hover:bg-gray-100 rounded-full cursor-pointer">
+        <button 
+          onClick={() => {
+            if (onNewChat) {
+              onNewChat();
+            } else {
+              alert("Función 'Nuevo Chat' en desarrollo. Próximamente podrás iniciar conversaciones desde aquí.");
+            }
+          }}
+          className="p-2 text-slate-500 hover:bg-gray-100 rounded-full cursor-pointer transition-colors"
+          title="Nuevo Chat (Próximamente)"
+        >
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
           </svg>
